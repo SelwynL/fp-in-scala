@@ -73,8 +73,8 @@ class FPSpec extends FunSuite {
   test("3.7 ... erm NO") {}
 
   test("3.8 foldRight should work when passed Nil and Cons") {
-    val list: List[Int] = Cons(1, Cons(2, Cons(3, Nil)))
-    assert(FP.foldRight(list, Nil: List[Int])(Cons(_, _)) === Cons(1, Cons(2, Cons(3, Nil))))
+    val list: FPList[Int] = Cons(1, Cons(2, Cons(3, Nil)))
+    assert(FP.foldRight(list, Nil: FPList[Int])(Cons(_, _)) === Cons(1, Cons(2, Cons(3, Nil))))
   }
 
   test("3.9 length should compute length of a list") {
@@ -101,20 +101,20 @@ class FPSpec extends FunSuite {
   test("3.13 foldLeftViaFoldRight and foldRightViaFoldLeft should ...") {}
 
   test("3.14 append using fold should add one list to another") {
-    val a1: List[Int] = Cons(1, Cons(2, Nil))
-    val a2: List[Int] = Cons(3, Nil)
-    val expected: List[Int] = Cons(1, Cons(2, Cons(3, Nil)))
+    val a1: FPList[Int] = Cons(1, Cons(2, Nil))
+    val a2: FPList[Int] = Cons(3, Nil)
+    val expected: FPList[Int] = Cons(1, Cons(2, Cons(3, Nil)))
 
     assert(FP.appendFR(a1, a2) === expected)
     assert(FP.appendFL(a1, a2) === expected)
   }
 
   test("3.15 concatenate should combine a list of lists into a single list") {
-    val l: List[List[Int]] =
+    val l: FPList[FPList[Int]] =
       Cons(Cons(1, Cons(1, Cons(1, Nil))),
            Cons(Cons(2, Cons(2, Cons(2, Nil))), Cons(Cons(3, Cons(3, Cons(3, Nil))), Nil)))
 
-    val expected: List[Int] =
+    val expected: FPList[Int] =
       Cons(1, Cons(1, Cons(1, Cons(2, Cons(2, Cons(2, Cons(3, Cons(3, Cons(3, Nil)))))))))
 
     assert(FP.concat(l) === expected)
@@ -136,5 +136,33 @@ class FPSpec extends FunSuite {
   test("3.19 filter should remove elements that do not statisfy the predicate") {
     val even: (Int => Boolean) = _ % 2 == 0
     assert(FP.filter(Cons(1, Cons(2, Cons(4, Nil))))(even) === Cons(2, Cons(4, Nil)))
+  }
+
+  test("3.20 flatMap should concatenate lists that result from mapping transformation") {
+    val doubleList: (Int => FPList[Int]) = i => Cons(i, Cons(i, Nil))
+    assert(
+      FP.flatMap(Cons(1, Cons(2, Cons(3, Nil))))(doubleList) === Cons(1,
+                                                                      Cons(1, Cons(2, Cons(2, Cons(3, Cons(3, Nil)))))))
+  }
+
+  test("3.21 filter should remove elements that do not statisfy the predicate") {
+    val even: (Int => Boolean) = _ % 2 == 0
+    assert(FP.filterFM(Cons(1, Cons(2, Cons(4, Nil))))(even) === Cons(2, Cons(4, Nil)))
+  }
+
+  test("3.22 add should add the elements of two lists together") {
+    val shortList: FPList[Int] = Cons(1, Cons(2, Nil))
+    val longList: FPList[Int] = Cons(1, Cons(2, Cons(3, Cons(4, Nil))))
+
+    assert(FP.add(shortList, shortList) === Cons(2, Cons(4, Nil)))
+    assert(FP.add(shortList, longList) === Cons(2, Cons(4, Cons(3, Cons(4, Nil)))))
+  }
+
+  test("3.22 zipWith should perform the function operation on the elements of two lists") {
+    val shortList: FPList[String] = Cons("aaa", Cons("bbb", Nil))
+    val longList: FPList[Int] = Cons(1, Cons(2, Nil))
+    val w: (String, Int) => (Int, String) = (s: String, i: Int) => (i, s)
+
+    assert(FP.zipWith(shortList, longList)(w) === Cons((1, "aaa"), Cons((2, "bbb"), Nil)))
   }
 }
