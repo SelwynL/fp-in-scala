@@ -4,6 +4,10 @@ sealed trait FPList[+A] // `FPList` data type, parameterized on a type, `A`
 case object Nil extends FPList[Nothing] // A `FPList` data constructor representing the empty list
 case class Cons[+A](head: A, tail: FPList[A]) extends FPList[A] // Another data constructor, representing nonempty lists. Note that `tail` is another `FPList[A]`, which may be `Nil` or another `Cons`.
 
+sealed trait FPTree[+A]
+case class Leaf[A](value: A) extends FPTree[A]
+case class Branch[A](left: FPTree[A], right: FPTree[A]) extends FPTree[A]
+
 object FP {
 
   /**
@@ -234,7 +238,7 @@ object FP {
     })
 
   /**
-    * Exercise 3.22: write a function that accepts two lists and constructs
+    * Exercise 3.22: function that accepts two lists and constructs
     * a new list by adding corresponding elements
     */
   def add(as1: FPList[Int], as2: FPList[Int]): FPList[Int] = {
@@ -258,4 +262,61 @@ object FP {
     case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(t1, t2)(f))
   }
 
+  /**
+    * Exercise 3.24: determine whether a list has a sublist
+    */
+  def hasSubsequence[A](sup: FPList[A], sub: FPList[A]): Boolean = {
+    @annotation.tailrec
+    def loop(p: FPList[A], b: FPList[A]): Boolean = (p, b) match {
+      case (Cons(h1, t1), Cons(h2, t2)) if h1 == h2 => loop(t1, t2)
+      case (_, Nil)                                 => true
+      case (_, _)                                   => false
+    }
+
+    sup match {
+      case Nil                          => false
+      case Cons(_, _) if loop(sup, sub) => true
+      case Cons(_, t)                   => hasSubsequence(t, sub)
+    }
+  }
+
+  /**
+    * Exercise 3.25: Count the number of nodes (leaves and branches) in a tree
+    */
+  def size[A](t: FPTree[A]): Int = t match {
+    case Leaf(_)      => 1
+    case Branch(a, b) => size(a) + size(b) + 1
+  }
+
+  /**
+    * Exercise 3.26: Return the maximum element in the tree
+    */
+  def maximum(t: FPTree[Int]): Int = t match {
+    case Leaf(v)      => v
+    case Branch(a, b) => maximum(a) max maximum(b)
+  }
+
+  /**
+    * Exercise 3.27: Max path length from the root to any leaf
+    */
+  def depth(t: FPTree[Int]): Int = t match {
+    case Leaf(v)      => 0
+    case Branch(a, b) => (depth(a) max depth(b)) + 1
+  }
+
+  /**
+    * Exercise 3.28: modify each element in a tree with a given function
+    */
+  def map[A, B](t: FPTree[A])(f: A => B): FPTree[B] = t match {
+    case Leaf(v)      => Leaf(f(v))
+    case Branch(a, b) => Branch(map(a)(f), map(b)(f))
+  }
+
+  /**
+    * Exercise 3.29: modify each element in a tree with a given function
+    */
+  def map[A, B](t: FPTree[A])(f: A => B): FPTree[B] = t match {
+    case Leaf(v)      => Leaf(f(v))
+    case Branch(a, b) => Branch(map(a)(f), map(b)(f))
+  }
 }

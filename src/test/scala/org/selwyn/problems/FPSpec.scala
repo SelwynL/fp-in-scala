@@ -158,11 +158,60 @@ class FPSpec extends FunSuite {
     assert(FP.add(shortList, longList) === Cons(2, Cons(4, Cons(3, Cons(4, Nil)))))
   }
 
-  test("3.22 zipWith should perform the function operation on the elements of two lists") {
+  test("3.23 zipWith should perform the function operation on the elements of two lists") {
     val shortList: FPList[String] = Cons("aaa", Cons("bbb", Nil))
     val longList: FPList[Int] = Cons(1, Cons(2, Nil))
     val w: (String, Int) => (Int, String) = (s: String, i: Int) => (i, s)
 
     assert(FP.zipWith(shortList, longList)(w) === Cons((1, "aaa"), Cons((2, "bbb"), Nil)))
+  }
+
+  test("3.24 hasSubsequence should determine is sublist exists in list") {
+    val shortList1: FPList[String] = Cons("a", Cons("b", Nil))
+    val shortList2: FPList[String] = Cons("c", Cons("d", Nil))
+    val longList: FPList[String] = Cons("a", Cons("b", Cons("c", Nil)))
+
+    assert(FP.hasSubsequence(longList, shortList1) === true)
+    assert(FP.hasSubsequence(longList, shortList2) === false)
+    assert(FP.hasSubsequence(shortList1, longList) === false)
+  }
+
+  test("3.25 size should determine number of branches and leaves") {
+    val left: FPTree[String] = Branch(Leaf("a"), Leaf("b"))
+    val right: FPTree[String] = Branch(Leaf("c"), Leaf("d"))
+    val tree: FPTree[String] = Branch(left, right)
+
+    assert(FP.size(tree) === 7)
+  }
+
+  test("3.26 maximum should return the largest amount in the tree") {
+    val left: FPTree[Int] = Branch(Leaf(2), Leaf(3))
+    val right2: FPTree[Int] = Branch(Leaf(1), Leaf(4))
+    val right: FPTree[Int] = Branch(Leaf(5), right2)
+    val tree: FPTree[Int] = Branch(left, right)
+
+    assert(FP.maximum(tree) === 5)
+  }
+
+  test("3.27 depth should return the max path length from the root to any leaf in the tree") {
+    val right3: FPTree[Int] = Branch(Leaf(0), Leaf(1))
+    val right2: FPTree[Int] = Branch(right3, Leaf(4))
+    val right: FPTree[Int] = Branch(Leaf(5), right2)
+    val left: FPTree[Int] = Branch(Leaf(2), Leaf(3))
+    val tree: FPTree[Int] = Branch(left, right)
+
+    assert(FP.depth(tree) === 4)
+  }
+
+  test("3.28 map should modify all elements in the tree") {
+    val leftInt: FPTree[Int] = Branch(Leaf(1), Leaf(2))
+    val rightInt: FPTree[Int] = Branch(Leaf(4), Leaf(3))
+    val treeInt: FPTree[Int] = Branch(leftInt, rightInt)
+
+    val leftString: FPTree[String] = Branch(Leaf("1"), Leaf("2"))
+    val rightString: FPTree[String] = Branch(Leaf("4"), Leaf("3"))
+    val treeString: FPTree[String] = Branch(leftString, rightString)
+
+    assert(FP.map(treeInt)(_.toString) === treeString)
   }
 }
