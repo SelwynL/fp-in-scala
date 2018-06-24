@@ -214,4 +214,8 @@ class FPSpec extends FunSuite {
 
     assert(FP.map(treeInt)(_.toString) === treeString)
   }
+
+  test("3.29 fold should apply to size, max, depth and map") {
+
+  }
 }

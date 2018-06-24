@@ -313,10 +313,19 @@ object FP {
   }
 
   /**
-    * Exercise 3.29: modify each element in a tree with a given function
+    * Exercise 3.29: generalize size, maximum, depth, and map, writing a new function fold
     */
-  def map[A, B](t: FPTree[A])(f: A => B): FPTree[B] = t match {
-    case Leaf(v)      => Leaf(f(v))
-    case Branch(a, b) => Branch(map(a)(f), map(b)(f))
+  def fold[A, B](t: FPTree[A])(f: A => B)(g: (B, B) => B): B = t match {
+    case Leaf(v)      => f(v)
+    case Branch(a, b) => g(fold(a)(f)(g), fold(b)(f)(g))
   }
+  def sizeF[A](t: FPTree[A]): Int =
+    fold(t)(_ => 1)((a, b) => a + b + 1)
+  def maximumF(t: FPTree[Int]): Int =
+    fold(t)(v => v)((a, b) => a max b)
+  def depthF(t: FPTree[Int]): Int =
+    fold(t)(_ => 0)((a, b) => a max b + 1)
+  def mapF[A, B](t: FPTree[A])(f: A => B): FPTree[B] =
+    fold(t)((v: A) => Leaf(f(v)): FPTree[B])(Branch(_, _))
+
 }
